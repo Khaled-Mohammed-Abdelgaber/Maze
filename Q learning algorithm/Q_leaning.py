@@ -146,7 +146,23 @@ class MazeSolver():
         
         path.append(next_state)
         return path
-
+    def start_to_end_actions(self , path):
+        #this function will be used to get all actions required to reach from the start point to the final point
+        #path is list of tuples
+        actions = []#will store all actions required to reach from start to end
+        for i in range(len(path)-1):#to loop over all states in path list
+            current_state = path[i]
+            next_state = path[i+1]
+            #our start is the most top left cell
+            if current_state[0] > next_state[0]:#row decrease
+                actions.append('N')
+            if current_state[0] < next_state[0]:#row increase
+                actions.append('S')
+            if current_state[1] > next_state[1]:#column decrease
+                actions.append('W')
+            if current_state[1] < next_state[1]:#column increase
+                actions.append('E')
+        return actions
 if __name__ == '__main__':
     lr = 0.6 #learning rate 
     gamma = 0.7 #discount rate
@@ -166,29 +182,7 @@ if __name__ == '__main__':
     
     path = solver.path_finder()
     print(path)
-    # print(lst_to_dict(path))
+    print(solver.start_to_end_actions(path))
     a=agent(m,x =start_state[0] , y =start_state[1] ,footprints=True)
     m.tracePath({a:path})
     m.run()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
