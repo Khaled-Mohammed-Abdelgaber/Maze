@@ -190,9 +190,9 @@ def north_updater(usual_action , north):
     if north == 'B' and usual_action == 'B' :
         new_north = 'B'
     if north == 'B' and usual_action == 'R' :
-        new_north = 'L'
-    if north == 'B' and usual_action == 'L' :
         new_north = 'R'
+    if north == 'B' and usual_action == 'L' :
+        new_north = 'L'
     ##################################################
     if north == 'R' and usual_action == 'F' :
         new_north = 'R'
