@@ -163,17 +163,126 @@ class MazeSolver():
             if current_state[1] < next_state[1]:#column increase
                 actions.append('E')
         return actions
+#******************************************************************************
+#******************************************************************************
+#       Start of functions Will be Used to convert from 
+#            ['E','N','S','W'] to ['F','B','L' ,'R']
+# this conversion will depend on the north direction
+
+def north_updater(usual_action , north):
+    #this function will return new north depend on the previouse north and taken action
+    #parameters :
+    # usual_action: taked action , north: north at the usual action
+    #return : 
+    # updated north after taking usual_action with the north 
+    #if action is B or F north does not change
+    if north == 'F' and usual_action == 'F' :
+        new_north = 'F'
+    if north == 'F' and usual_action == 'B' :
+        new_north = 'F'
+    if north == 'F' and usual_action == 'R' :
+        new_north = 'L'
+    if north == 'F' and usual_action == 'L' :
+        new_north = 'R'
+    ###############################################
+    if north == 'B' and usual_action == 'F' :
+        new_north = 'B'
+    if north == 'B' and usual_action == 'B' :
+        new_north = 'B'
+    if north == 'B' and usual_action == 'R' :
+        new_north = 'L'
+    if north == 'B' and usual_action == 'L' :
+        new_north = 'R'
+    ##################################################
+    if north == 'R' and usual_action == 'F' :
+        new_north = 'R'
+    if north == 'R' and usual_action == 'B' :
+        new_north = 'R'
+    if north == 'R' and usual_action == 'R' :
+        new_north = 'F'
+    if north == 'R' and usual_action == 'L' :
+        new_north = 'B'
+    ################################################
+    if north == 'L' and usual_action == 'F' :
+        new_north = 'L'
+    if north == 'L' and usual_action == 'B' :
+        new_north = 'L'
+    if north == 'L' and usual_action == 'R' :
+        new_north = 'B'
+    if north == 'L' and usual_action == 'L' :
+        new_north = 'F'
+        
+    return new_north
+    
+def reverse_direction(direction):
+    if direction == 'R':
+        return 'L'
+    elif direction == 'L':
+        return 'R'
+    elif direction == 'F':
+        return 'B'
+    elif direction == 'B':
+        return 'F'
+def compass_direction_to_usual_direction(comp_action,north = 'F'):
+    """
+    this functtion will convert from ['E','N','S','W'] to ['F','B','L' ,'R']
+    parameters:
+        # it will recieve compase direction and
+        # where is the north of robot for example may be the north is in front or backward 
+        or right or left of the robot
+    return:
+        #usual direction which is one of ['F','B','L' ,'R']
+        #new north direction 
+    """
+    #IMPORTANT NOTE : CODE DEPEND ON THE FOLLOWING ORDER OF COMP_ACTION AND USUAL_ACTION LISTS
+    #DO NOT CHANGE THE FOLLOWING ORDER
+    comp_actions = np.array(['E','W','N','S'])
+    usual_actions = np.array(['R','L','F','B' ])
+    
+    if north == 'F':
+        ##same index
+        usual_action = usual_actions[np.where(comp_actions == comp_action)[0][0]]
+        
+        
+    elif north == 'B':
+        usual_action = usual_actions[np.where(comp_actions == comp_action)[0][0]]
+        usual_action = reverse_direction(usual_action)
+        
+    elif north == 'R':
+        if comp_action == 'N' or comp_action == 'S':
+            usual_action = usual_actions[np.where(comp_actions == comp_action)[0][0]-2]
+            
+        elif comp_action == 'W':
+            usual_action = 'F'
+            
+        elif comp_action == 'E':
+            usual_action = 'B'
+    elif north == 'L':
+        if comp_action == 'N':
+            usual_action = 'L'
+        elif comp_action == 'S':
+            usual_action = 'R'
+        elif comp_action == 'E':
+            usual_action = 'F'
+        elif comp_action == 'W':
+            usual_action = 'B'
+    
+    new_north = north_updater(usual_action , north)
+    print(f"{usual_action} ==> north {new_north}")
+    return usual_action , new_north 
+    
+    
 if __name__ == '__main__':
     lr = 0.6 #learning rate 
     gamma = 0.7 #discount rate
     exp_rat = 0.1 #exploration rate
-    start_state = (1,3) #start point
-    end_state = (9,7) # end point
+    start_state = (1,1) #start point
+    end_state = (5,5) # end point
     #determine maze size
-    rows = 10 #number of rows
-    columns = 10 #number of columns
+    rows = 5 #number of rows
+    columns = 5 #number of columns
     
-    epochs = 40
+    epochs = 10
     m=maze(rows,columns)
     m.CreateMaze(x= end_state[0],y=end_state[1] ,loopPercent = 100)
     
@@ -181,8 +290,15 @@ if __name__ == '__main__':
     solver.train()  
     
     path = solver.path_finder()
-    print(path)
-    print(solver.start_to_end_actions(path))
+    print(f"path states {path}")
+    path_actions = solver.start_to_end_actions(path)
+    print(f"path compass actions {path_actions}")
+    usual_actions = []
+    north = 'F'
+    for action in path_actions:
+        action , north =  compass_direction_to_usual_direction(action,north )
+        usual_actions.append(action)
+    print(f"path usual acttions {usual_actions}")
     a=agent(m,x =start_state[0] , y =start_state[1] ,footprints=True)
     m.tracePath({a:path})
     m.run()
